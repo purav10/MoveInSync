@@ -44,13 +44,12 @@ async def login(form_data: UserForm = Body(...) , db: AsyncIOMotorClient = Depen
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes=30)
     permissions = "admin" if user.get("is_superuser") else "user"
     access_token = security.create_access_token(
         data={"sub": user["email"], "permissions": permissions}
     )
 
-    return {"access_token": access_token, "token_type": "bearer", "message" : "Log" }
+    return {"access_token": access_token, "token_type": "bearer", "message" : "Logged in successfully" }
 
 @auth_router.post("/signup")
 async def signup(form_data: UserForm = Body(...), db: AsyncIOMotorClient = Depends(get_database)):    
@@ -62,7 +61,6 @@ async def signup(form_data: UserForm = Body(...), db: AsyncIOMotorClient = Depen
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes=30)
     permissions = "admin" if user.get("is_superuser") else "user"
     access_token = security.create_access_token(
         data={"sub": user["email"], "permissions": permissions}

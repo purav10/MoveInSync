@@ -8,10 +8,8 @@ from config import settings
 # from app.db.mongodb_utils import get_database, close_database
 from apps.api.api_v1.routers import (
     # users_router, 
-    # buses_router, 
-    # bookings_router, 
-    # routes_router, 
-    auth_router as auth_router 
+    buses_router,
+    auth_router
 )
 # from apps.core.auth import get_current_active_user
 
@@ -43,16 +41,14 @@ async def root():
 # app.include_router(
 #     users_router,
 #     prefix="/api/v1/users",
-#     tags=["users"],
-#     dependencies=[Depends(get_current_active_user)]
+#     tags=["users"]
 # )
 
-# app.include_router(
-#     buses_router,
-#     prefix="/api/v1/buses",
-#     tags=["buses"],
-#     # Add dependencies if needed
-# )
+app.include_router(
+    buses_router,
+    prefix="/api/v1/buses",
+    tags=["buses"],
+)
 
 # app.include_router(
 #     bookings_router,

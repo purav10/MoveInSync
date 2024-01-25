@@ -34,7 +34,6 @@ class Bus(BaseModel):
     bus_name: str
     total_seats: int
     current_occupancy: int
-    available_days: List[str]
     routes: List[PyObjectId] = []
 
 class Route(BaseModel):
