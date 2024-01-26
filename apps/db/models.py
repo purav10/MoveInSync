@@ -31,17 +31,14 @@ class User(BaseModel):
 
 class Bus(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    bus_name: str
+    name: str
+    distance: float
+    cost: float
+    time: float
+    color: str
     total_seats: int
     current_occupancy: int
-    routes: List[PyObjectId] = []
-
-class Route(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    start_location: str
-    end_location: str
-    distance: float
-    estimated_time: int
+    routes: List[str] = []
 
 class Booking(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")

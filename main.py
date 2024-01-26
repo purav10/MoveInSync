@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from config import settings
 # from app.db.mongodb_utils import get_database, close_database
 from apps.api.api_v1.routers import (
-    # users_router, 
+    users_router, 
     buses_router,
     auth_router
 )
@@ -37,12 +37,12 @@ app = FastAPI(lifespan=mongodb_connection)
 async def root():
     return {"message": "Hello from Bus Booking System"}
 
-# # Routers
-# app.include_router(
-#     users_router,
-#     prefix="/api/v1/users",
-#     tags=["users"]
-# )
+# Routers
+app.include_router(
+    users_router,
+    prefix="/api/v1/users",
+    tags=["users"]
+)
 
 app.include_router(
     buses_router,
