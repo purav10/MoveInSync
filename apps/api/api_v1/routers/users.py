@@ -9,10 +9,13 @@ from apps.core import security as settings
 from pydantic import BaseModel
 from bson import ObjectId
 from .buses import update_color
+from datetime import datetime
 
 class SeatBooking(BaseModel):
     bus_id: str
     seat_number: int
+    boarding_date: datetime
+    
 class RouteForm(BaseModel):
     source: str
     destination: str
@@ -45,6 +48,7 @@ async def get_current_user(abcd: token_decoded, db: AsyncIOMotorClient = Depends
 async def book_seat(booking : SeatBooking, db: AsyncIOMotorClient = Depends(get_database)):
     bus_id = (booking.bus_id)
     seat_number = (booking.seat_number)
+    boarding_date = (booking.boarding_date)
     user = await get_current_user(token_decoded,db)
     print(user)
     if not user:
@@ -72,6 +76,8 @@ async def book_seat(booking : SeatBooking, db: AsyncIOMotorClient = Depends(get_
         "bus_id": bus_id,
         "user_id": user["email"],
         "seat_number": seat_number,
+        "booking_date": datetime.now(),
+        "boarding_date": boarding_date,
         "status": "booked"
     }
     await db["booking"].insert_one(booking)
@@ -171,3 +177,13 @@ async def route(form_data: RouteForm = Body(...), db: AsyncIOMotorClient = Depen
 
     raise HTTPException(status_code=404, detail="Path not found")
 
+
+@users_router.get("/get_seats", response_model=List[Dict])
+async def get_seats(bus_id: str, db: AsyncIOMotorClient = Depends(get_database)):
+    seats = await db["seats"].find({"bus_id": bus_id}).to_list(length=100)
+    return seats
+
+@users_router.get("/get_buses", response_model=List[Dict])
+async def get_buses(db: AsyncIOMotorClient = Depends(get_database)):
+    buses = await db["buses"].find().to_list(length=100)
+    return buses

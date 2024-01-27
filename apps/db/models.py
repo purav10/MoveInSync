@@ -38,6 +38,7 @@ class Bus(BaseModel):
     color: str
     total_seats: int
     current_occupancy: int
+    dates: List[datetime] = []
     routes: List[str] = []
 
 class Booking(BaseModel):
@@ -46,6 +47,7 @@ class Booking(BaseModel):
     bus_id: PyObjectId
     seat_number: int
     booking_date: datetime
+    boarding_date: datetime
     status: str
 
 class Seat(BaseModel):

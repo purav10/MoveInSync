@@ -13,6 +13,7 @@ from apps.utils import get_database
 from apps.db.models import Bus
 from typing import List, Dict, Annotated, Optional
 from fastapi.responses import JSONResponse
+from datetime import datetime
 
 
 class BusCreate(BaseModel):
@@ -22,8 +23,13 @@ class BusCreate(BaseModel):
     time: float
     total_seats: int
     current_occupancy: int
+    dates: list
     color: str
     Routes: list
+
+class BusUpdate(BaseModel):
+    add_date: datetime
+    bus_id: str
 
 class SeatBooking(BaseModel):
     bus_id: str
@@ -71,10 +77,36 @@ async def create_bus(bus_data: BusCreate, db: AsyncIOMotorClient = Depends(get_d
 
     bus = bus_data.dict()
     await db["buses"].insert_one(bus)
-
+    for i in range (1, bus["total_seats"] + 1 - bus["current_occupancy"]):
+        await db["seats"].insert_one({"bus_id": bus["_id"], "seat_number": i, "is_booked": False})
     await update_color(bus["_id"], db)
-    print(bus)
     return {"message": "Bus Created Successfully"}
+
+
+
+@buses_router.post("/update_bus")
+async def update_bus(update_data: BusUpdate, db: AsyncIOMotorClient = Depends(get_database)):
+    user = await get_current_user(token_decoded,db)
+    if not user or not user.get("is_superuser"):
+        raise HTTPException(status_code=status.HTTP_403_FORIDDEN, detail="Not authorized")
+    bus = await db["buses"].find_one({"_id": ObjectId(update_data.bus_id)})
+    if not bus:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bus not found")
+    print(bus)
+    if bus["dates"]==None:
+        dates=[]
+        dates.append(update_data.add_date)
+        print(dates)
+        await db["buses"].update_one({"_id": ObjectId(update_data.bus_id)}, {"$set": {"dates": dates}})
+        return ;
+    if update_data.add_date in bus["dates"]:
+        return ;
+    dates = bus["dates"]
+    dates.append(update_data.add_date)
+    print(dates)
+    await db["buses"].update_one({"_id": ObjectId(update_data.bus_id)}, {"$set": {"dates": dates}})
+    return {"message": "Bus Updated Successfully"}
+
 
 @buses_router.get("/get_buses")
 async def get_buses(db: AsyncIOMotorClient = Depends(get_database)):
@@ -82,6 +114,7 @@ async def get_buses(db: AsyncIOMotorClient = Depends(get_database)):
         buses = await db["buses"].find().to_list(length=100)
         for bus in buses:
             bus['_id'] = str(bus['_id'])
+            bus['dates'] = [date.isoformat() for date in bus['dates']]
         return JSONResponse(content=buses)
     except Exception as e:
         print(e)
