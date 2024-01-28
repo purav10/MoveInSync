@@ -165,7 +165,6 @@ async def route(form_data: RouteForm = Body(...), db: AsyncIOMotorClient = Depen
                 distance += bus["distance"]
                 eta += bus["time"]
             return {"bus_name": buses, "time": eta, "distance": distance, "stops": path, "start_location": start, "end_location": end}
-        # Get neighbors from the database
         neighbors = await db["buses"].find({"Routes.0": current_node}).to_list(length=100000000)
         for neighbor in neighbors:
             old_time = times.get(neighbor["Routes"][1], (float('inf'), []))[0]
